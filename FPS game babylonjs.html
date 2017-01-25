@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+        <title>Babylon.js sample code</title>
+        <!-- Babylon.js -->
+        <script src="http://www.babylonjs.com/hand.minified-1.2.js"></script>
+        <script src="http://www.babylonjs.com/cannon.js"></script>
+        <script src="http://www.babylonjs.com/oimo.js"></script>
+        <script src="http://www.babylonjs.com/babylon.js"></script>
+        <style>
+            html, body {
+                overflow: hidden;
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+
+            #renderCanvas {
+                width: 100%;
+                height: 100%;
+                touch-action: none;
+            }
+        </style>
+    </head>
+<body>
+    <div id="canvasZone">
+        <canvas id="renderCanvas"></canvas>
+    </div>
+    <script>
+        var canvas = document.getElementById("renderCanvas");
+        var engine = new BABYLON.Engine(canvas, true);
+
+        var createScene = function () {
+
+    // This creates a basic Babylon Scene object (non-mesh)
+    var scene = new BABYLON.Scene(engine);
+
+    // This creates and positions a free camera (non-mesh)
+    var camera = new BABYLON.UniversalCamera("camera1", new BABYLON.Vector3(0, 8, -20), scene);
+
+    // This targets the camera to scene origin
+    camera.setTarget(BABYLON.Vector3.Zero());
+
+    // This attaches the camera to the canvas
+    camera.attachControl(canvas, true);
+    scene.collisionsEnabled = true;
+camera.checkCollisions = true;
+    
+setInterval(function(){
+  //  VJC.dispose();
+}, 10000)
+
+var but1 = document.createElement("button");
+		but1.setAttribute("id", "but1");
+//		but2.textContent = "Hi There!";
+		document.body.appendChild(but1);
+but1.style.backgroundColor = "#4CAF50";
+	but1.style.position = "absolute";
+    but1.textContent = "EnableVJC"
+    	but1.style.color = "yellow";
+        but1.style.opacity = ".7";
+		but1.style.fontFamily = "Courier New";
+		but1.style.fontWeight = "bold";
+		but1.style.fontSize = "2em";
+
+		but1.style.bottom = "100px";
+		but1.style.right = "40px";
+		but1.style.width = '100px';
+		but1.style.height = "60px";
+        but1.onclick = function(){
+            var VJC = new BABYLON.VirtualJoysticksCamera("VJC", scene.activeCamera.position, scene);
+              VJC.rotation = scene.activeCamera.rotation;
+              VJC.checkCollisions = scene.activeCamera.checkCollisions;
+              VJC.applyGravity = scene.activeCamera.applyGravity;
+        scene.activeCamera = VJC;
+        VJC.attachControl(canvas, true);
+        }
+        
+        //controlling the camera up's and down's
+        scene.registerBeforeRender(function () {
+		if (camera.rotation.x < 0) {
+			camera.rotation.x = 0;
+		}
+		if (camera.rotation.x > 0.5) {
+			camera.rotation.x = 0.5;
+		}
+    	if (camera.position.y > 5) {
+			camera.position.y = 5.2;
+		}
+        	if (camera.position.z < -20) {
+			camera.position.z = -20;
+		}
+	})
+
+
+/*
+scene.onPointerDown = function (evt, pickResult) {
+        // if the click hits the ground object, we change the impact position
+        if (pickResult.hit) {
+            pickResult.pickedMesh.dispose();
+        }
+    };
+    */
+
+    // This creates a light, aiming 0,1,0 - to the sky (non-mesh)
+    var light = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(0, 1, 0), scene);
+
+    // Default intensity is 1. Let's dim the light a small amount
+    light.intensity = 0.7;
+//game ****
+var player = BABYLON.Mesh.CreateSphere("sphere1", 16, 0.3, scene);
+player.position.z = 2
+player.position.x = -0.2
+player.visibility = 0;
+player.parent = camera;
+    // Our built-in 'sphere' shape. Params: name, subdivs, size, scene
+    var sphere = BABYLON.Mesh.CreateSphere("sphere1", 16, 30, scene);
+sphere.position.y = 1
+sphere.visibility = 0
+    // Move the sphere upward 1/2 its height    
+	sphere.scaling = new BABYLON.Vector3(0.1, 0.1, 0.1);
+	
+    // Our built-in 'ground' shape. Params: name, width, depth, subdivs, scene
+    
+	BABYLON.SceneLoader.ImportMesh("elf", "https://raw.githubusercontent.com/BabylonJS/Website/master/Assets/Elf/", "Elf.babylon", scene, function (newMeshes, particleSystems, skeletons) {
+        var rabbit = newMeshes[0];
+var skeleton = skeletons[0]
+//rabbit.material = materialSphere;
+        rabbit.scaling = new BABYLON.Vector3(2, 2, 2)
+        rabbit.material = new BABYLON.StandardMaterial("wallMat", scene);
+    rabbit.material.emissiveColor = new BABYLON.Color3(Math.random(), Math.random(), Math.random());
+
+    sphere.parent = rabbit;
+        rabbit.position = sphere.position.clone();
+      //shadowGenerator.getShadowMap().renderList.push(rabbit);
+
+   
+        scene.beginAnimation(skeletons[0], 0, 15, true, 0.8);
+        scene.onPointerDown = function (evt, pickResult) {
+        // if the click hits the ground object, we change the impact position
+        if (pickResult.pickedMesh.name === "sphere1") {
+            rabbit.setEnabled(false);
+                setTimeout(function(){
+                    rabbit.setEnabled(true);
+                    rabbit.position.z = camera.position.z + 3;
+                    rabbit.position.y = 0.5
+                    rabbit.position.x = Math.random() * 5;
+    rabbit.material = new BABYLON.StandardMaterial("wallMat", scene);
+    rabbit.material.emissiveColor = new BABYLON.Color3(Math.random(), Math.random(), Math.random());
+
+                }, 5000)
+            
+        }
+    };
+    
+ scene.registerBeforeRender(function(){
+           rabbit.lookAt(player.absolutePosition)
+           rabbit.locallyTranslate(new BABYLON.Vector3(0, 0, -0.08))
+       }) 
+       //players' health***
+
+      	var but2 = document.createElement("div");
+		but2.setAttribute("id", "but2");
+//		but2.textContent = "Hi There!";
+		document.body.appendChild(but2);
+but2.style.backgroundColor = "#4CAF50";
+		but2.style.color = "gold";
+		but2.style.border = "3pt midnightblue ridged";
+		but2.style.backgroundColor = "midnightblue";
+		but2.style.opacity = ".7";
+		but2.style.fontFamily = "Courier New";
+		but2.style.fontWeight = "bold";
+		but2.style.fontSize = "1em";
+
+		but2.style.position = "absolute";
+		but2.style.top = "100px";
+		but2.style.right = "40px";
+		but2.style.width = "400px";
+		but2.style.height = "50px";
+var score = 400;
+
+	var but = document.createElement("div");
+		but.setAttribute("id", "but");
+//		but2.textContent = "Hi There!";
+		document.body.appendChild(but);
+but.style.backgroundColor = "#FF0000";
+	but.style.position = "absolute";
+    but.textContent = "Health"
+    	but.style.color = "yellow";
+        but.style.opacity = ".7";
+		but.style.fontFamily = "Courier New";
+		but.style.fontWeight = "bold";
+		but.style.fontSize = "2em";
+
+		but.style.top = "100px";
+		but.style.right = "40px";
+		but.style.width = score +'px';
+		but.style.height = "50px";
+       
+var set = setInterval(myScore, 1000);
+function myScore() {
+
+              but.style.width = score +'px';
+      if(rabbit.intersectsMesh(player)){
+
+score -= 20;
+           
+   };	
+}
+    });
+
+
+    // Our built-in 'sphere' shape. Params: name, subdivs, size, scene
+    
+var building = BABYLON.Mesh.CreateBox("sphere1", 3, scene);
+
+    // Move the sphere upward 1/2 its height
+    building.position.x = 0;
+building.scaling.x = 8
+building.scaling.y = 15
+building.checkCollisions = true
+//building2
+var building2 = BABYLON.Mesh.CreateBox("sphere1", 3, scene);
+
+    // Move the sphere upward 1/2 its height
+    building2.position.x = -1;
+building2.scaling.x = 8
+building2.scaling.y = 15
+building2.checkCollisions = true
+
+    // Our built-in 'ground' shape. Params: name, width, depth, subdivs, scene
+    var ground = BABYLON.Mesh.CreateGround("ground1", 1000, 1000, 2, scene);
+var groundMaterial = new BABYLON.StandardMaterial("ground", scene);
+	groundMaterial.diffuseTexture = new BABYLON.Texture("https://upload.wikimedia.org/wikipedia/commons/7/75/Asphalt_deterioration.jpg", scene);
+	groundMaterial.diffuseTexture.uScale = 6;
+	groundMaterial.diffuseTexture.vScale = 6;
+	groundMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
+	ground.material = groundMaterial;
+    ground.position.y =- 5
+    ground.checkCollisions = true;
+ //   var ceiling = BABYLON.Mesh.CreateGround("ground1", 1000, 1000, 2, scene);
+ //ceiling.position.y = 12
+       var wall = BABYLON.Mesh.CreateBox("sphere1", 2, scene);
+
+    // Move the sphere upward 1/2 its height
+    wall.position.y = 0;
+    wall.position.x = camera.position.x + 2;
+wall.scaling.z = 100
+wall.scaling.x = 0.3
+wall.scaling.y = 15
+wall.checkCollisions = true;
+//wall2
+  var wall2 = BABYLON.Mesh.CreateBox("sphere1", 2, scene);
+
+    // Move the sphere upward 1/2 its height
+    wall2.position.y = 0;
+    wall2.position.x = wall.position.x - 80;
+wall2.scaling.z = 100
+wall2.scaling.x = -0.3
+wall2.scaling.y = 15
+wall2.checkCollisions = true;
+//wall mat
+var wallMaterial = new BABYLON.StandardMaterial("ground", scene);
+	wallMaterial.diffuseTexture = new BABYLON.Texture("https://upload.wikimedia.org/wikipedia/commons/thumb/d/d1/Brick_wall_close-up_view.jpg/640px-Brick_wall_close-up_view.jpg", scene);
+	wallMaterial.diffuseTexture.uScale = 6;
+	wallMaterial.diffuseTexture.vScale = 6;
+	wallMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
+wall.material = wallMaterial;
+wall2.material = wallMaterial;
+building.material = wallMaterial;
+building2.material = wallMaterial;
+    
+    scene.registerBeforeRender(function(){
+ //camera.position.z += 0.2
+        if(camera.position.z > building.position.z + 10){
+       // alert('hit')
+     //  ground.dispose();
+     ground.position.z = camera.position.z + 100;
+     building.position.z = camera.position.z + 100;
+      building2.position.z = camera.position.z + 50;
+    /* if(rabbit){
+        rabbit.position.z = camera.position.z + 40
+    }
+    */
+     wall.position.z = camera.position.z + 100;
+    wall2.position.z = camera.position.z + 50;
+     building.position.x = -Math.random() * 10;
+      //building2.position.x = ;
+    }
+    })
+    return scene;
+
+};
+        
+        var scene = createScene();
+
+        engine.runRenderLoop(function () {
+            scene.render();
+        });
+
+        // Resize
+        window.addEventListener("resize", function () {
+            engine.resize();
+        });
+    </script>
+</body>
+</html>
